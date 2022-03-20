@@ -2,16 +2,24 @@ const BlogsModel = require("../models/BlogsModel")
 const AuthorModel = require("../models/AuthorModel")
 const moment = require("moment")
 const jwt = require("jsonwebtoken")
+const { updateOne } = require("../models/BlogsModel")
+
 const createBlog = async function (req, res) {    //In this block to create author data
     try {
         let data = req.body
+        if (data.isPublished == true) {
+            await BlogsModel.findOneAndUpdate({ _id: userId }, { publishedAt:new Date() }, { new: true });
+        }
+        let token = req.headers['x-api-key'];
+        let decodedToken = jwt.verify(token, 'functionup-thorium')
+        if(data.authorId!=decodedToken.userId) return res.status(406).send("enter valid authorId")
+
         let author_id = data.authorId
         if (!author_id) {
             return res.status(404).send("the request is not valid as the authorId details are required.")
         }
         let author = await AuthorModel.findById(author_id)
         if (!author) return res.status(404).send("the request is not valid as the no author is present with the giiven authr id")
-
         let savedData = await BlogsModel.create(data)
         res.status(201).send({ status: Boolean, msg: savedData })
     }
@@ -26,14 +34,13 @@ const getblogData = async function (req, res) {
         const data = req.query
         const filter = {
             isDeleted: false,
-            isPublished: true,        
+            isPublished: true,
             ...data
         }
-        //return res.status(200).send({ msg: filter })
+        if (Object.keys(data).length == 0) return res.status(203).send("please enter query filter")
         let blog = await BlogsModel.findOne(filter)
-        if(!blog)  return res.send("data is not available")
+        if (!blog) return res.send("data is not available")
         let allUsers = await BlogsModel.findOne(filter).populate('authorId')
-        console.log(allUsers.type)
         res.status(200).send({ msg: allUsers })
     } catch (e) {
         res.status(404).send({ status: false, msg: e.message })
@@ -43,13 +50,17 @@ const updatedblog = async function (req, res) {    //in this block author can up
     try {
         let userId = req.params.blogId;
         let user = await BlogsModel.findById(userId);
-        
+
         if (!user) {
             return res.send("No such user exists");
         }
         if (user.isDeleted == false) {
             let userData = req.body;
+            if (userData.isPublished == true) {
+                await BlogsModel.findOneAndUpdate({ _id: userId }, { publishedAt:new Date() }, { new: true });
+            }
             let updatedUser = await BlogsModel.findOneAndUpdate({ _id: userId }, userData, { new: true });
+
             res.status(200).send({ status: true, data: updatedUser });
         }
         else {
@@ -64,11 +75,11 @@ const deleteblog = async function (req, res) {   //in this block accept request 
     try {
         let userId = req.params.blogId;
         let user = await BlogsModel.findById(userId);
-        
+
         if (!user) {
             return res.send("No such user exists");
         }
-        let deletedUser = await BlogsModel.findOneAndUpdate({ _id: userId }, { isDeleted:true, deletedAt: moment().format() }, { new: true });
+        let deletedUser = await BlogsModel.findOneAndUpdate({ _id: userId }, { isDeleted: false, deletedAt: moment().format() }, { new: true });
         res.status(200).send({ status: true, data: deletedUser });
     }
     catch (err) {
@@ -89,7 +100,7 @@ const Deleteblog = async function (req, res) {   //in thisn block accpt query pa
         if (!user) {
             return res.status(404).send("No such user exists");
         }
-        let deletedUser = await BlogsModel.findOneAndUpdate({ user }, { isDeleted: true, deletedAt: moment().format() }, { new: true });
+        let deletedUser = await BlogsModel.findOneAndUpdate({ _id: user._id }, { isDeleted: true, deletedAt: moment().format() }, { new: true });
         res.status(200).send({ status: true, data: deletedUser });
     }
     catch (err) {
@@ -103,7 +114,7 @@ const login = async function (req, res) {    //author can login this block
         let userId = req.body.email;
         let password = req.body.password;
 
-        let user = await AuthorModel.findOne({ email: userId,password: password });
+        let user = await AuthorModel.findOne({ email: userId, password: password });
         console.log(user)
         if (!user)
             return res.send({
