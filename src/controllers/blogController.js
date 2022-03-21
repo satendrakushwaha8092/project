@@ -8,11 +8,11 @@ const createBlog = async function (req, res) {    //In this block to create auth
     try {
         let data = req.body
         if (data.isPublished == true) {
-            await BlogsModel.findOneAndUpdate({ _id: userId }, { publishedAt:new Date() }, { new: true });
+            await BlogsModel.findOneAndUpdate({ _id: userId }, { publishedAt: new Date() }, { new: true });
         }
         let token = req.headers['x-api-key'];
         let decodedToken = jwt.verify(token, 'functionup-thorium')
-        if(data.authorId!=decodedToken.userId) return res.status(406).send("enter valid authorId")
+        if (data.authorId != decodedToken.userId) return res.status(406).send("enter valid authorId")
 
         let author_id = data.authorId
         if (!author_id) {
@@ -48,7 +48,8 @@ const getblogData = async function (req, res) {
 }
 const updatedblog = async function (req, res) {    //in this block author can update blog
     try {
-        let userId = req.params.blogId;
+        let userId = req.params.blogId
+        if (Object.keys(userId).length == 0) return res.status(203).send("body params is missing")
         let user = await BlogsModel.findById(userId);
 
         if (!user) {
@@ -57,7 +58,7 @@ const updatedblog = async function (req, res) {    //in this block author can up
         if (user.isDeleted == false) {
             let userData = req.body;
             if (userData.isPublished == true) {
-                await BlogsModel.findOneAndUpdate({ _id: userId }, { publishedAt:new Date() }, { new: true });
+                await BlogsModel.findOneAndUpdate({ _id: userId }, { publishedAt: new Date() }, { new: true });
             }
             let updatedUser = await BlogsModel.findOneAndUpdate({ _id: userId }, userData, { new: true });
 
@@ -70,7 +71,7 @@ const updatedblog = async function (req, res) {    //in this block author can up
     catch (e) {
         res.status(404).send({ status: false, msg: e.message })
     }
-};
+}
 const deleteblog = async function (req, res) {   //in this block accept request params
     try {
         let userId = req.params.blogId;
@@ -79,7 +80,8 @@ const deleteblog = async function (req, res) {   //in this block accept request 
         if (!user) {
             return res.send("No such user exists");
         }
-        let deletedUser = await BlogsModel.findOneAndUpdate({ _id: userId }, { isDeleted: false, deletedAt: moment().format() }, { new: true });
+        if (user.isDeleted == true) return res.send("data is not available")
+        let deletedUser = await BlogsModel.findOneAndUpdate({ _id: userId }, { isDeleted: true, deletedAt: moment().format() }, { new: true });
         res.status(200).send({ status: true, data: deletedUser });
     }
     catch (err) {
@@ -100,6 +102,7 @@ const Deleteblog = async function (req, res) {   //in thisn block accpt query pa
         if (!user) {
             return res.status(404).send("No such user exists");
         }
+        if (user.isDeleted == true) res.send("data is not available")
         let deletedUser = await BlogsModel.findOneAndUpdate({ _id: user._id }, { isDeleted: true, deletedAt: moment().format() }, { new: true });
         res.status(200).send({ status: true, data: deletedUser });
     }
@@ -115,7 +118,7 @@ const login = async function (req, res) {    //author can login this block
         let password = req.body.password;
 
         let user = await AuthorModel.findOne({ email: userId, password: password });
-        console.log(user)
+
         if (!user)
             return res.send({
                 status: false,

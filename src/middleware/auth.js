@@ -7,7 +7,6 @@ const authenticate = function (req, res, next) {
         let token = req.headers['x-api-key'];
         if (!token) token = req.headers["x-api-key"];
         if (!token) return res.status(404).send({ status: false, msg: "token must be present" });
-        console.log(token);
         next()
     }
     catch (err) {
@@ -23,6 +22,7 @@ const authorise = async function (req, res, next) {
     let blog
     if (Object.keys(data).length == 0) {
         const data = req.query
+        if (Object.keys(data).length == 0) return res.status(400).send("please enter body params or query params")
          blog = await BlogsModel.findOne(data)
         if (!blog) return res.status(400).send("blog is not found")
     }
@@ -32,10 +32,8 @@ const authorise = async function (req, res, next) {
     }
 
     try {
-        let token = req.headers['x-api-key'];
+        let token = req.headers['x-api-key']
         let decodedToken = jwt.verify(token, 'functionup-thorium')
-
-        //console.log(decodedToken.userId)
         if (!decodedToken) return res.staus(404).send({ status: false, msg: "token is not valid" })
         if (decodedToken.userId != blog.authorId) return res.status(400).send({ status: false, msg: 'User logged is not allowed to modify the requested users data' })
 

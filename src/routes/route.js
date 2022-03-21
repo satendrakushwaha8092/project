@@ -3,7 +3,7 @@ const router = express.Router();
 const authorController = require("../Controllers/authorController")
 const blogController = require("../Controllers/blogController")
 const middleware = require("../middleware/auth")
-
+/*
 //phase-1
 router.post("/authors", authorController.createAuthor)  //create author
 
@@ -18,7 +18,7 @@ router.get("/authors", authorController.getauthorData)  //get all authrs detail
  router.delete("/blogs/:blogId", blogController.deleteblog)  //delete blog by body param
 
  router.delete("/blogs", blogController.Deleteblog)  //delete blog by query params
-
+*/
 //phase-2
 
 router.post("/authors", authorController.createAuthor)  //create authors detail

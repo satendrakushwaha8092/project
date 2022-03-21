@@ -26,7 +26,7 @@ const blogSchema = new mongoose.Schema({
         default: []
     },
     deletedAt: {
-        type: String,
+        type:String,
         default: " "
     },
     isDeleted: {
@@ -44,25 +44,3 @@ const blogSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 module.exports = mongoose.model("Blog", blogSchema);
-
-/*const mongoose = require('mongoose');
-const blogSchema = new mongoose.Schema( {
-    title: {required:true},
-    body: {mandatory}, 
-    //authorId: {mandatory, refs to author model}, 
-    tags:String, 
-    category: {type:String,required:true},    
-     // examples: [technology, entertainment, life style, food, fashion]}, 
-    subcategory:{type:String,required:true},
-    // {array of string, examples[technology-[web development, mobile development, AI, ML etc]] }, 
-    createdAt: {timestamps: true },
-    updatedAt: { timestamps: true },
-    deletedAt: { timestamps: true }, 
-    isDeleted: {type:boolean,default:false}, 
-    publishedAt:{ timestamps: true },  
-    isPublished: {type:boolean,default:false},
-},
-  { timestamps: true });
-
-
-module.exports = mongoose.model('blogdetail', blogSchema)*/
