@@ -22,18 +22,18 @@ const authorise = async function (req, res, next) {
     let blog
     if (Object.keys(data).length == 0) {
         const data = req.query
-        if (Object.keys(data).length == 0) return res.status(400).send("please enter body params or query params")
+        if (Object.keys(data).length == 0) return res.status(400).send({ status: false,msg:"please enter body params or query params"})
          blog = await BlogsModel.findOne(data)
-        if (!blog) return res.status(400).send("blog is not found")
+        if (!blog) return res.status(400).send({ status: false,msg:"blog is not found"})
     }
     else {
          blog = await BlogsModel.findById(data.blogId)
-        if (!blog) return res.status(400).send("blog is not found")
+        if (!blog) return res.status(400).send({ status: false,msg:"blog is not found"})
     }
 
     try {
         let token = req.headers['x-api-key']
-        let decodedToken = jwt.verify(token, 'functionup-thorium')
+        let decodedToken = jwt.verify(token, 'project1')
         if (!decodedToken) return res.staus(404).send({ status: false, msg: "token is not valid" })
         if (decodedToken.userId != blog.authorId) return res.status(400).send({ status: false, msg: 'User logged is not allowed to modify the requested users data' })
 

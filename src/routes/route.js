@@ -23,8 +23,6 @@ router.get("/authors", authorController.getauthorData)  //get all authrs detail
 
 router.post("/authors", authorController.createAuthor)  //create authors detail
 
-router.get("/authors", authorController.getauthorData)  //get all authrs detail
-
 router.post("/login", blogController.login)   //auther is logit
 
 router.post("/blogs", middleware.authenticate, blogController.createBlog)   //create blogs
